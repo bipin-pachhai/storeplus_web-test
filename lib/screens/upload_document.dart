@@ -3,7 +3,9 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
-import 'dart:html' as webFile;
+import 'dart:html' as webfile;
+
+//import 'package:http/http.dart' as http;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
@@ -123,25 +125,32 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                                   setState(() {
                                     error = '';
                                   });
-                                  //   var result;
+
                                   if (kIsWeb) {
-                                    webFile.InputElement File =
-                                        webFile.FileUploadInputElement();
+                                    // TO FIX:
+
+                                    webfile.InputElement File =
+                                        webfile.FileUploadInputElement();
                                     File.click();
                                     File.onChange.listen((event) {
                                       final file = File.files.first;
-                                      final reader = webFile.FileReader();
+
+                                      final reader = webfile.FileReader();
 
                                       var a = file.name;
+                                      print(a);
                                       if (a.contains('.xlsx')) {
+                                        //  reader.readAsText(file);
+                                        reader.readAsArrayBuffer(file);
                                         reader.onLoadEnd.listen((event) {
-                                          reader.readAsArrayBuffer(file);
                                           var decoder =
                                               SpreadsheetDecoder.decodeBytes(
                                                   reader.result);
+                                          //TO FIX: 'Sheet 1' it's hardcoded
                                           var table = decoder.tables['Sheet 1'];
-                                          var values = table.rows[0];
-                                          print(values);
+                                          for (var row in table.rows)
+                                            //var values = table.rows[0];
+                                            print(row);
                                         });
                                       }
                                     }); //end of eventlistener
