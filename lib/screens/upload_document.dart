@@ -143,6 +143,19 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                                         //  reader.readAsText(file);
                                         reader.readAsArrayBuffer(file);
                                         reader.onLoadEnd.listen((event) {
+                                          var excel =
+                                              Excel.decodeBytes(reader.result);
+                                          for (var table in excel.tables.keys) {
+                                            print(table); //sheet Name
+                                            print(excel.tables[table].maxCols);
+                                            print(excel.tables[table].maxRows);
+                                            for (var row
+                                                in excel.tables[table].rows) {
+                                              print("$row");
+                                            }
+                                          }
+
+                                          /*
                                           var decoder =
                                               SpreadsheetDecoder.decodeBytes(
                                                   reader.result);
@@ -150,7 +163,8 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                                           var table = decoder.tables['Sheet 1'];
                                           for (var row in table.rows)
                                             //var values = table.rows[0];
-                                            print(row);
+                                           print(row);
+                                            */
                                         });
                                       }
                                     }); //end of eventlistener
