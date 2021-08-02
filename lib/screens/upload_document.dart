@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'dart:html' as webfile;
 
 //import 'package:http/http.dart' as http;
+import 'package:data_mapping/screens/table_view.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/foundation.dart';
@@ -31,6 +32,7 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
   bool showLoader = false;
   String error = '';
   var itemsInfo;
+  var maxCols;
   _UploadDocumentScreenState();
 
   @override
@@ -136,40 +138,69 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                                       final file = File.files.first;
 
                                       final reader = webfile.FileReader();
+                                      setState(() {
+                                        showLoader = true;
+                                      });
+                                      reader.readAsArrayBuffer(file);
 
                                       var a = file.name;
+                                      var tableresult = [];
+                                      int i = 0;
                                       print(a);
+
                                       if (a.contains('.xlsx')) {
                                         //  reader.readAsText(file);
-                                        reader.readAsArrayBuffer(file);
+
                                         reader.onLoadEnd.listen((event) {
+                                          setState(() {
+                                            showLoader = false;
+                                          });
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      TableView(
+                                                          itemsInfo, maxCols)));
                                           var excel =
                                               Excel.decodeBytes(reader.result);
                                           for (var table in excel.tables.keys) {
                                             print(table); //sheet Name
-                                            print(excel.tables[table].maxCols);
-                                            print(excel.tables[table].maxRows);
+                                            print(
+                                                "Total columns in the table:" +
+                                                    excel.tables[table].maxCols
+                                                        .toString());
+                                            maxCols =
+                                                excel.tables[table].maxCols;
+                                            //  print(excel.tables[table].maxRows);
                                             for (var row
                                                 in excel.tables[table].rows) {
-                                              print("$row");
+                                              if (i == 0) {
+                                                i++;
+                                                continue;
+                                              }
+                                              //i++;
+                                              tableresult.add(row);
+                                              // print("done:" + i.toString());
+                                              // print("$row");
                                             }
+                                            print(tableresult[3]);
                                           }
+                                        });
+                                        itemsInfo = tableresult;
 
-                                          /*
-                                          var decoder =
-                                              SpreadsheetDecoder.decodeBytes(
-                                                  reader.result);
-                                          //TO FIX: 'Sheet 1' it's hardcoded
-                                          var table = decoder.tables['Sheet 1'];
-                                          for (var row in table.rows)
-                                            //var values = table.rows[0];
-                                           print(row);
-                                            */
+                                        /*
+                                       
+                                                    */
+                                      } else {
+                                        setState(() {
+                                          error =
+                                              'Please select an xlsx or xls or csv file to proceed';
                                         });
                                       }
                                     }); //end of eventlistener
 
-                                  } //end of if
+                                  } //end of ifweb
+
                                   else {
                                     var result = await FlutterDocumentPicker
                                         .openDocument();
@@ -272,12 +303,6 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
 
                                         print("Uploaded Successfully");
                                         print(itemsInfo.toString());
-                                        //     Navigator.push(
-                                        //                                        context,
-                                        //                                      MaterialPageRoute(
-                                        //                                        builder: (context) =>
-                                        //                                          UploadImagesScreen(
-                                        //                                            "Bipin", itemsInfo)));
                                       }
                                     } else {
                                       setState(() {
@@ -285,7 +310,7 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                                             'Please select an xlsx or xls or csv file to proceed';
                                       });
                                     }
-                                  }
+                                  } // end of is notWeb condition
                                 }
                               : () {},
                         ),
